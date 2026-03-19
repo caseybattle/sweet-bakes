@@ -183,7 +183,6 @@ function Nav({ view, onSwitch, onScrollTo }) {
 
 function HeroSection({ onCTA }) {
   const heroRef = useRef();
-  const videoRef = useRef();
   const slot1Ref = useRef();
   const slot2Ref = useRef();
   const bylineRef = useRef();
@@ -191,17 +190,10 @@ function HeroSection({ onCTA }) {
   const ctaRef = useRef();
   const eyebrowRef = useRef();
 
-  // Smooth fade-in from poster → video once the video is ready to play
-  useEffect(() => {
-    const vid = videoRef.current;
-    if (!vid) return;
-    gsap.set(vid, { opacity: 0 });
-    const onReady = () => gsap.to(vid, { opacity: 1, duration: 1.4, ease: "power2.inOut" });
-    vid.addEventListener("canplay", onReady, { once: true });
-    // Fallback: fade in after 1.5s if canplay never fires (e.g. cached video)
-    const fallback = setTimeout(() => gsap.to(vid, { opacity: 1, duration: 1.2, ease: "power2.inOut" }), 1500);
-    return () => { vid.removeEventListener("canplay", onReady); clearTimeout(fallback); };
-  }, []);
+  // Called by onCanPlay — fires even for cached/instant-load videos
+  const handleVideoReady = (e) => {
+    gsap.to(e.currentTarget, { opacity: 1, duration: 1.6, ease: "power2.inOut" });
+  };
 
   const slot1Words = ["CRAFTED", "BAKED", "FRESH", "SWEET"];
   const slot2Words = ["GOODS", "TREATS", "DREAMS", "BAKES"];
@@ -238,8 +230,8 @@ function HeroSection({ onCTA }) {
   return (
     <section ref={heroRef} className="hero">
       <div className="hero__video-wrap">
-        <div className="hero__poster-bg" style={{ backgroundImage:"url('/images/hero-cake.png')" }} />
-        <video ref={videoRef} className="hero__video-bg" src="/videos/hero.mp4" autoPlay muted loop playsInline />
+        <div className="hero__poster-bg" style={{ backgroundImage:"url('/hero-cake.png')" }} />
+        <video className="hero__video-bg" src="/videos/hero.mp4" autoPlay muted loop playsInline onCanPlay={handleVideoReady} />
         <div className="hero__overlay" />
       </div>
       <div className="hero__content">
