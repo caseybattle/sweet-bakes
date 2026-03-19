@@ -182,37 +182,73 @@ function Nav({ view, onSwitch, onScrollTo }) {
 }
 
 function HeroSection({ onCTA }) {
-  const heroRef = useRef();
-  const slot1Ref = useRef();
-  const slot2Ref = useRef();
-  const bylineRef = useRef();
+  const heroRef    = useRef();
+  const rulerRef   = useRef();
+  const word1Ref   = useRef();
+  const word2Ref   = useRef();
+  const sigRef     = useRef();
   const taglineRef = useRef();
-  const ctaRef = useRef();
+  const ctaRef     = useRef();
   const eyebrowRef = useRef();
 
-  // Called by onCanPlay — fires even for cached/instant-load videos
   const handleVideoReady = (e) => {
-    gsap.to(e.currentTarget, { opacity: 1, duration: 1.6, ease: "power2.inOut" });
+    gsap.to(e.currentTarget, { opacity: 1, duration: 1.8, ease: "power2.inOut" });
   };
 
-  const slot1Words = ["CRAFTED", "BAKED", "FRESH", "SWEET"];
-  const slot2Words = ["GOODS", "TREATS", "DREAMS", "BAKES"];
-
   useGSAP(() => {
-    gsap.from(eyebrowRef.current, { y:20, opacity:0, duration:0.8, delay:0.5, ease:"power2.out" });
-    const wordH = slot1Ref.current?.offsetHeight || 120;
-    const tl1 = gsap.timeline({ delay: 0.8 });
-    for (let i = 1; i < slot1Words.length; i++) {
-      tl1.to(slot1Ref.current, { y: -wordH * i, duration: i === slot1Words.length - 1 ? 0.5 : 0.18, ease: i === slot1Words.length - 1 ? "elastic.out(1.2,0.5)" : "power2.inOut" }, i === 1 ? 0 : `+=${0.12}`);
-    }
-    const tl2 = gsap.timeline({ delay: 1.0 });
-    for (let i = 1; i < slot2Words.length; i++) {
-      tl2.to(slot2Ref.current, { y: -wordH * i, duration: i === slot2Words.length - 1 ? 0.5 : 0.18, ease: i === slot2Words.length - 1 ? "elastic.out(1.2,0.5)" : "power2.inOut" }, i === 1 ? 0 : `+=${0.12}`);
-    }
-    gsap.from(bylineRef.current,  { y:30, opacity:0, duration:0.8, delay:2.2, ease:"power2.out" });
-    gsap.from(taglineRef.current, { y:20, opacity:0, duration:0.7, delay:2.5, ease:"power2.out" });
-    gsap.from(ctaRef.current,     { y:20, opacity:0, duration:0.6, delay:2.7, ease:"power2.out" });
+    // Pre-hide elements whose CSS has no opacity:0 (GSAP from needs explicit start)
+    gsap.set([sigRef.current, taglineRef.current, ctaRef.current, eyebrowRef.current], { opacity: 0 });
+    gsap.set(rulerRef.current, { scaleX: 0, transformOrigin: "center" });
 
+    const tl = gsap.timeline();
+
+    // 1 — thin ruler draws across from centre out
+    tl.to(rulerRef.current,
+      { scaleX: 1, duration: 0.9, ease: "expo.out" },
+      0.15
+    );
+
+    // 2 — eyebrow letter-space in
+    tl.fromTo(eyebrowRef.current,
+      { opacity: 0, letterSpacing: "0.5em" },
+      { opacity: 1, letterSpacing: "0.35em", duration: 1.0, ease: "power3.out" },
+      0.2
+    );
+
+    // 3 — "SWEET" letters curtain-rise
+    tl.from(word1Ref.current.querySelectorAll(".hero__letter"),
+      { y: "105%", duration: 1.1, stagger: 0.045, ease: "expo.out" },
+      0.45
+    );
+
+    // 4 — "BAKES" letters follow
+    tl.from(word2Ref.current.querySelectorAll(".hero__letter"),
+      { y: "105%", duration: 1.1, stagger: 0.045, ease: "expo.out" },
+      0.65
+    );
+
+    // 5 — signature "by MeeMee" blurs into focus
+    tl.fromTo(sigRef.current,
+      { opacity: 0, y: 28, filter: "blur(10px)" },
+      { opacity: 1, y: 0,  filter: "blur(0px)", duration: 1.4, ease: "power2.out" },
+      1.35
+    );
+
+    // 6 — tagline soft fade
+    tl.fromTo(taglineRef.current,
+      { opacity: 0, y: 18 },
+      { opacity: 1, y: 0, duration: 0.9, ease: "power2.out" },
+      1.9
+    );
+
+    // 7 — CTA
+    tl.fromTo(ctaRef.current,
+      { opacity: 0, y: 16 },
+      { opacity: 1, y: 0, duration: 0.7, ease: "power2.out" },
+      2.2
+    );
+
+    // Scroll parallax — content drifts up & fades, video scales
     const scrollTl = gsap.timeline({
       scrollTrigger: {
         trigger: heroRef.current,
@@ -223,38 +259,56 @@ function HeroSection({ onCTA }) {
         anticipatePin: 1,
       }
     });
-    scrollTl.to(heroRef.current.querySelector(".hero__content"),    { y:-80, opacity:0, ease:"power2.in" }, 0);
-    scrollTl.to(heroRef.current.querySelector(".hero__video-wrap"), { scale:1.08, ease:"none" }, 0);
+    scrollTl.to(heroRef.current.querySelector(".hero__content"),    { y: -80, opacity: 0, ease: "power2.in" }, 0);
+    scrollTl.to(heroRef.current.querySelector(".hero__video-wrap"), { scale: 1.08, ease: "none" }, 0);
   }, { scope: heroRef });
+
+  const makeLetters = (word) =>
+    word.split("").map((ch, i) => (
+      <span key={i} className="hero__letter-wrap">
+        <span className="hero__letter">{ch}</span>
+      </span>
+    ));
 
   return (
     <section ref={heroRef} className="hero">
       <div className="hero__video-wrap">
-        <div className="hero__poster-bg" style={{ backgroundImage:"url('/hero-cake.png')" }} />
+        <div className="hero__poster-bg" style={{ backgroundImage: "url('/hero-cake.png')" }} />
         <video className="hero__video-bg" src="/videos/hero.mp4" autoPlay muted loop playsInline onCanPlay={handleVideoReady} />
         <div className="hero__overlay" />
       </div>
+
       <div className="hero__content">
+        {/* Eyebrow */}
         <p ref={eyebrowRef} className="hero__eyebrow">Atlanta, GA · Handcrafted · Made to Order</p>
+
+        {/* Decorative rule */}
+        <div ref={rulerRef} className="hero__ruler" />
+
+        {/* Main headline — per-letter curtain rise */}
         <h1 className="hero__headline">
-          <span className="hero__slot">
-            <span ref={slot1Ref} className="hero__slot-track">
-              {slot1Words.map((w,i) => <span key={i} className="hero__slot-word">{w}</span>)}
-            </span>
-          </span>
-          {" "}
-          <span className="hero__slot">
-            <span ref={slot2Ref} className="hero__slot-track">
-              {slot2Words.map((w,i) => <span key={i} className="hero__slot-word">{w}</span>)}
-            </span>
-          </span>
+          <span ref={word1Ref} className="hero__word-row">{makeLetters("SWEET")}</span>
+          <span ref={word2Ref} className="hero__word-row">{makeLetters("BAKES")}</span>
         </h1>
-        <p ref={bylineRef} className="hero__byline"><em>by MeeMee</em></p>
-        <p ref={taglineRef} className="hero__tagline">Premium baked goods crafted with intention.<br />Every item made fresh — pre-order for your date.</p>
+
+        {/* Signature */}
+        <div ref={sigRef} className="hero__sig-row">
+          <span className="hero__sig-rule" />
+          <p className="hero__signature"><em>by MeeMee</em></p>
+          <span className="hero__sig-rule" />
+        </div>
+
+        {/* Tagline */}
+        <p ref={taglineRef} className="hero__tagline">
+          Premium baked goods crafted with intention.<br />Every item made fresh — pre-order for your date.
+        </p>
+
+        {/* CTA */}
         <div ref={ctaRef}>
-          <MagneticButton onClick={onCTA} className="mag-btn">Explore the Menu →</MagneticButton>
+          <MagneticButton onClick={onCTA} className="mag-btn hero__cta-btn">Explore the Menu →</MagneticButton>
         </div>
       </div>
+
       <div className="hero__scroll-cue">
         <span>scroll</span>
         <div className="hero__scroll-line" />
