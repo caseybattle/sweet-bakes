@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@300;400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@300;400;500&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -347,28 +347,48 @@ a {
   opacity: 0; /* GSAP fades in on canplay */
 }
 
-/* ── Pure dark vignette — no white wash ── */
+/* ── Dark vignette — text has its own image via background-clip ── */
 .hero__overlay {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(to bottom, rgba(0,0,0,0.10) 0%, transparent 35%),
-    linear-gradient(to top,    rgba(0,0,0,0.55) 0%, transparent 60%),
-    linear-gradient(to right,  rgba(0,0,0,0.18) 0%, transparent 40%);
+    rgba(0,0,0,0.55),
+    linear-gradient(to top,    rgba(0,0,0,0.5) 0%, transparent 50%),
+    linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, transparent 35%);
   z-index: 2;
 }
 
-/* ── Content — centred over the image ── */
+/* ── Headline container — no transform-based scroll animation touches this ── */
 .hero__content {
-  position: relative;
+  position: absolute;
+  inset: 0;
   z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 22vh;
+  text-align: center;
+  padding-left: 40px;
+  padding-right: 40px;
+  pointer-events: none;
+  gap: 12px;
+}
+
+/* ── Sub-content (eyebrow, sig, tagline, CTA) — slides up on scroll ── */
+.hero__sub-content {
+  position: absolute;
+  bottom: 48px;
+  left: 0;
+  right: 0;
+  z-index: 4;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
   padding: 0 40px;
-  width: 100%;
-  max-width: 1100px;
+  gap: 10px;
+  pointer-events: auto;
 }
 
 /* Eyebrow */
@@ -391,13 +411,12 @@ a {
   transform-origin: center;
 }
 
-/* Headline — white, ultra-thin, editorial */
+/* Headline */
 .hero__headline {
   font-family: var(--font-display);
-  font-size: clamp(88px, 13vw, 200px);
-  line-height: 0.9;
-  font-weight: 200;
-  color: #fff;
+  font-size: clamp(55px, 10.5vw, 155px);
+  line-height: 0.88;
+  font-weight: 700;
   letter-spacing: -0.01em;
   margin-bottom: 0;
   display: flex;
@@ -406,23 +425,17 @@ a {
   gap: 0;
 }
 
-/* Per-word row — overflow hidden creates the curtain mask */
+/* Word row — clip-path curtain animation (no transform = no GPU compositing layer)
+   background-clip:text + background-image works when element has no transform */
 .hero__word-row {
   display: block;
-  overflow: hidden;
-  line-height: 1.02em;
-}
-
-/* Individual letter inside mask */
-.hero__letter-wrap {
-  display: inline-block;
-  overflow: hidden;
-  vertical-align: top;
-}
-
-.hero__letter {
-  display: inline-block;
-  will-change: transform;
+  line-height: 0.92;
+  background-image: url('/images/item-cake-vanilla.jpg');
+  background-size: cover;
+  background-position: center 40%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 /* Signature row: rule — "by MeeMee" — rule */

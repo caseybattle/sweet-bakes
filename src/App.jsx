@@ -195,6 +195,7 @@ function HeroSection({ onCTA }) {
     gsap.to(e.currentTarget, { opacity: 1, duration: 1.8, ease: "power2.inOut" });
   };
 
+
   useGSAP(() => {
     // Pre-hide elements whose CSS has no opacity:0 (GSAP from needs explicit start)
     gsap.set([sigRef.current, taglineRef.current, ctaRef.current, eyebrowRef.current], { opacity: 0 });
@@ -215,16 +216,19 @@ function HeroSection({ onCTA }) {
       0.2
     );
 
-    // 3 — "SWEET" letters curtain-rise
-    tl.from(word1Ref.current.querySelectorAll(".hero__letter"),
-      { y: "105%", duration: 1.1, stagger: 0.045, ease: "expo.out" },
+    // 3 — "SWEET" curtain-rise via clip-path (no transform = no GPU compositing layer
+    //      = background-clip:text + background-image works correctly in Chrome)
+    tl.fromTo(word1Ref.current,
+      { clipPath: "inset(110% 0 0 0)" },
+      { clipPath: "inset(0% 0 0 0)", duration: 1.2, ease: "expo.out" },
       0.45
     );
 
-    // 4 — "BAKES" letters follow
-    tl.from(word2Ref.current.querySelectorAll(".hero__letter"),
-      { y: "105%", duration: 1.1, stagger: 0.045, ease: "expo.out" },
-      0.65
+    // 4 — "BAKES" follows
+    tl.fromTo(word2Ref.current,
+      { clipPath: "inset(110% 0 0 0)" },
+      { clipPath: "inset(0% 0 0 0)", duration: 1.2, ease: "expo.out" },
+      0.7
     );
 
     // 5 — signature "by MeeMee" blurs into focus
@@ -259,51 +263,42 @@ function HeroSection({ onCTA }) {
         anticipatePin: 1,
       }
     });
-    scrollTl.to(heroRef.current.querySelector(".hero__content"),    { y: -80, opacity: 0, ease: "power2.in" }, 0);
-    scrollTl.to(heroRef.current.querySelector(".hero__video-wrap"), { scale: 1.08, ease: "none" }, 0);
+    scrollTl.to(heroRef.current.querySelector(".hero__sub-content"),  { y: -60, opacity: 0, ease: "power2.in" }, 0);
+    scrollTl.to(heroRef.current.querySelector(".hero__headline"),     { opacity: 0, ease: "power2.in" }, 0);
+    scrollTl.to(heroRef.current.querySelector(".hero__video-wrap"),   { scale: 1.08, ease: "none" }, 0);
   }, { scope: heroRef });
-
-  const makeLetters = (word) =>
-    word.split("").map((ch, i) => (
-      <span key={i} className="hero__letter-wrap">
-        <span className="hero__letter">{ch}</span>
-      </span>
-    ));
 
   return (
     <section ref={heroRef} className="hero">
       <div className="hero__video-wrap">
-        <div className="hero__poster-bg" style={{ backgroundImage: "url('/hero-cake.png')" }} />
+        <div className="hero__poster-bg" style={{ backgroundImage: "url('/images/item-cake-vanilla.jpg')" }} />
         <video className="hero__video-bg" src="/videos/hero.mp4" autoPlay muted loop playsInline onCanPlay={handleVideoReady} />
         <div className="hero__overlay" />
       </div>
 
+      {/* Headline — separate container; no transform-based GSAP animation on this
+           so background-clip:text + background-image works correctly in Chrome */}
       <div className="hero__content">
-        {/* Eyebrow */}
         <p ref={eyebrowRef} className="hero__eyebrow">Atlanta, GA · Handcrafted · Made to Order</p>
-
-        {/* Decorative rule */}
         <div ref={rulerRef} className="hero__ruler" />
-
-        {/* Main headline — per-letter curtain rise */}
         <h1 className="hero__headline">
-          <span ref={word1Ref} className="hero__word-row">{makeLetters("SWEET")}</span>
-          <span ref={word2Ref} className="hero__word-row">{makeLetters("BAKES")}</span>
+          <span ref={word1Ref} className="hero__word-row">SWEET</span>
+          <span ref={word2Ref} className="hero__word-row">BAKES</span>
         </h1>
+      </div>
 
-        {/* Signature */}
+      {/* Sub-content (slides up & fades on scroll) */}
+      <div className="hero__sub-content">
         <div ref={sigRef} className="hero__sig-row">
           <span className="hero__sig-rule" />
           <p className="hero__signature"><em>by MeeMee</em></p>
           <span className="hero__sig-rule" />
         </div>
 
-        {/* Tagline */}
         <p ref={taglineRef} className="hero__tagline">
           Premium baked goods crafted with intention.<br />Every item made fresh — pre-order for your date.
         </p>
 
-        {/* CTA */}
         <div ref={ctaRef}>
           <MagneticButton onClick={onCTA} className="mag-btn hero__cta-btn">Explore the Menu →</MagneticButton>
         </div>
