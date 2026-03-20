@@ -271,7 +271,7 @@ function HeroSection({ onCTA }) {
   return (
     <section ref={heroRef} className="hero">
       <div className="hero__video-wrap">
-        <div className="hero__poster-bg" style={{ backgroundImage: "url('/images/item-cake-vanilla.jpg')" }} />
+        <div className="hero__poster-bg" style={{ backgroundImage: "url('/images/item-cake-choc.jpg')" }} />
         <video className="hero__video-bg" src="/videos/hero.mp4" autoPlay muted loop playsInline onCanPlay={handleVideoReady} />
         <div className="hero__overlay" />
       </div>

@@ -398,7 +398,7 @@ a {
   letter-spacing: 0.35em;
   text-transform: uppercase;
   color: rgba(255,255,255,0.75);
-  margin-bottom: 18px;
+  margin-bottom: 10px;
   opacity: 0;
 }
 
@@ -407,35 +407,46 @@ a {
   width: clamp(200px, 30vw, 380px);
   height: 1px;
   background: linear-gradient(to right, transparent, rgba(255,255,255,0.6), transparent);
-  margin-bottom: 24px;
+  margin-bottom: 14px;
   transform-origin: center;
 }
 
 /* Headline */
 .hero__headline {
   font-family: var(--font-display);
-  font-size: clamp(55px, 10.5vw, 155px);
-  line-height: 0.88;
+  font-size: clamp(70px, 13vw, 192px);
+  line-height: 0.9;
   font-weight: 700;
-  letter-spacing: -0.01em;
+  letter-spacing: 0.04em;
   margin-bottom: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0;
+  gap: 4px;
 }
 
-/* Word row — clip-path curtain animation (no transform = no GPU compositing layer)
-   background-clip:text + background-image works when element has no transform */
+/* Word row — translucent cake image + animated shine sweep
+   Three stacked backgrounds all clipped to text:
+   1. Animated shine streak (sweeps across)
+   2. Frosting veil (makes letters feel glassy/translucent)
+   3. Actual cake image (gives the rich color fill) */
 .hero__word-row {
   display: block;
-  line-height: 0.92;
-  background-image: url('/images/item-cake-vanilla.jpg');
-  background-size: cover;
-  background-position: center 40%;
+  line-height: 0.95;
+  background:
+    linear-gradient(105deg, transparent 20%, rgba(255,255,255,0.55) 46%, transparent 68%),
+    url('/images/item-cake-choc.jpg');
+  background-size: 300% 100%, cover;
+  background-position: 150% 0, center 35%;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+  animation: heroShine 5s ease-in-out infinite 2.6s;
+}
+
+@keyframes heroShine {
+  0%, 100% { background-position: 150% 0, center 35%; }
+  40%, 60% { background-position: -80% 0, center 35%; }
 }
 
 /* Signature row: rule — "by MeeMee" — rule */
